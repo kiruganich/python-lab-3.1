@@ -1,31 +1,43 @@
 from __future__ import annotations
 from task import Task
-from typing import runtime_checkable, Protocol, Any
 from collections.abc import Iterable, Iterator, Generator
+
 from system import TaskSource
+from exceptions import TaskValidationError
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class TaskQueue:
-    def __init__(self) -> None:
-        self._tasks: list[Task] = []
+    def __init__(self, source: TaskSource | None = None) -> None:
+        if source:
+            self._tasks: list[Task] = list(source.get_tasks())
+        else:
+            self._tasks: list[Task] = []
     
     def __iter__(self) -> Iterator[Task]:
         return iter(self._tasks)
     
     def add(self, task: Task) -> None:
+        if not isinstance(task, Task):
+            logger.error(f"Expected Task, got {type(task).__name__}")
+            raise TaskValidationError(f"Task Validation failed: Expected Task, got {type(task).__name__}")
         self._tasks.append(task)
+        logger.debug(f"Task added: {task.id[:8]}... priority={task.priority}")
 
     def extend(self, tasks: Iterable[Task]) -> None:
-        self._tasks.extend(tasks)
+        for task in tasks:
+            self.add(task)
 
     def filter_by_status(self, status: str) -> Generator[Task, None, None]:
         for task in self._tasks:
             if task.status == status:
                 yield task
         
-    def filter_by_priority(self, priority: int, min_p: int, max_p: int = 10) -> Generator[Task, None, None]:
+    def filter_by_priority(self, min_p: int, max_p: int = 10) -> Generator[Task, None, None]:
         for task in self._tasks:
-            if task.priority == priority:
+            if min_p <= task.priority <= max_p:
                 yield task
     
     def filter_active(self) -> Generator[Task, None, None]:
@@ -45,5 +57,12 @@ class TaskQueue:
     def __repr__(self) -> str:
         return f"TaskQueue(tasks={len(self._tasks)})"
     
-    def load_from(self, source: TaskSource) -> None: # альтернатива extend
-        self.extend(source.get_tasks())
+    def pop(self) -> Task:
+        if not self._tasks:
+            logger.error("Queue is empty")
+            raise TaskValidationError("Task Validation failed: Queue is empty")
+        return self._tasks.pop(0)
+    
+    def clear(self) -> None:
+        self._tasks = []
+        logger.info("Queue cleared")
