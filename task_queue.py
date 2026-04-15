@@ -10,6 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 class TaskQueue:
+    """
+    Коллекция задач с поддержкой ленивой обработки.
+
+    Совместима со стандартными конструкциями Python: for, list, sum, len, in.
+    Поддерживает повторный обход очереди.
+
+    """
     def __init__(self, source: TaskSource | None = None) -> None:
         if source:
             self._tasks: list[Task] = list(source.get_tasks())
