@@ -1,7 +1,7 @@
 from __future__ import annotations
 from task import Task
 from collections.abc import Iterable, Iterator, Generator
-
+from collections import deque
 from system import TaskSource
 from exceptions import TaskValidationError
 
@@ -19,9 +19,9 @@ class TaskQueue:
     """
     def __init__(self, source: TaskSource | None = None) -> None:
         if source:
-            self._tasks: list[Task] = list(source.get_tasks())
+            self._tasks: deque[Task] = deque(source.get_tasks())
         else:
-            self._tasks: list[Task] = []
+            self._tasks: deque[Task] = deque()
     
     def __iter__(self) -> Iterator[Task]:
         return iter(self._tasks)
@@ -68,7 +68,7 @@ class TaskQueue:
         if not self._tasks:
             logger.error("Queue is empty")
             raise TaskValidationError("Task Validation failed: Queue is empty")
-        return self._tasks.pop(0)
+        return self._tasks.popleft()
     
     def clear(self) -> None:
         self._tasks = []
