@@ -1,9 +1,9 @@
 from __future__ import annotations
-from task import Task
+from src.task import Task
 from collections.abc import Iterable, Iterator, Generator
 from collections import deque
-from system import TaskSource
-from exceptions import TaskValidationError
+from src.system import TaskSource
+from src.exceptions import TaskValidationError
 
 import logging
 logger = logging.getLogger(__name__)
@@ -18,11 +18,18 @@ class TaskQueue:
 
     """
     def __init__(self, source: TaskSource | None = None) -> None:
-        self._source = source
+        self._sources_exhausted = False
+        self._sources: list[TaskSource] = []
         self._tasks: deque[Task] = deque()
         if source:
-            for task in source.get_tasks():
-                self._tasks.append(task)
+            self.add_source(source)
+
+    def add_source(self, source: TaskSource) -> None:
+        if not isinstance(source, TaskSource):
+            logger.error(f"Expected TaskSource, got {type(source).__name__}")
+            raise TaskValidationError(f"Task Validation failed: Expected TaskSource, got {type(source).__name__}")
+        self._sources.append(source)
+        logger.debug(f"Source added: {type(source).__name__}")
     
     def __iter__(self) -> Iterator[Task]:
         return iter(self._tasks)
@@ -39,31 +46,37 @@ class TaskQueue:
             self.add(task)
 
     def filter_by_status(self, status: str) -> Generator[Task, None, None]:
-        for task in self._tasks:
+        for task in self.stream():
             if task.status == status:
                 yield task
         
     def filter_by_priority(self, min_p: int, max_p: int = 10) -> Generator[Task, None, None]:
-        for task in self._tasks:
+        for task in self.stream():
             if min_p <= task.priority <= max_p:
                 yield task
     
     def filter_active(self) -> Generator[Task, None, None]:
-        for task in self._tasks:
+        for task in self.stream():
             if task.is_active:
                 yield task
 
     def stream(self) -> Generator[Task, None, None]:
         yield from self._tasks
+        if not self._sources_exhausted:
+            for source in self._sources:
+                for task in source.get_tasks():
+                    self._tasks.append(task)
+                    yield task
+        self._sources_exhausted = True
     
     def __len__(self) -> int:
         return len(self._tasks)
     def __bool__(self) -> bool:
-        return bool(self._tasks)
+        return len(self) > 0
     def __contains__(self, task: Task) -> bool:
         return task in self._tasks
     def __repr__(self) -> str:
-        return f"TaskQueue(tasks={len(self._tasks)})"
+        return f"TaskQueue(tasks={len(self)})"
     
     def pop(self) -> Task:
         if not self._tasks:
@@ -72,5 +85,5 @@ class TaskQueue:
         return self._tasks.popleft()
     
     def clear(self) -> None:
-        self._tasks = []
+        self._tasks.clear()
         logger.info("Queue cleared")

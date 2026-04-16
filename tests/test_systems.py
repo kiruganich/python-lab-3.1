@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import types
 import pytest
 
-from task import Task
-from task_queue import TaskQueue
-from exceptions import TaskValidationError
+from src.task import Task
+from src.task_queue import TaskQueue
+from src.exceptions import TaskValidationError
 
 
 class TestTaskQueueCreation:

@@ -3,10 +3,10 @@ from pathlib import Path
 
 import logging
 
-from task import Task
-from task_queue import TaskQueue
-from exceptions import TaskValidationError, TaskPriorityError, TaskPayloadError
-from system import GeneratorTaskSource, APITaskSource, FileTaskSource, create_sample_file
+from src.task import Task
+from src.task_queue import TaskQueue
+from src.exceptions import TaskValidationError, TaskPriorityError, TaskPayloadError
+from src.system import GeneratorTaskSource, APITaskSource, FileTaskSource, create_sample_file
 
 logging.basicConfig(
     level=logging.INFO,

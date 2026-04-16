@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import uuid
 from datetime import datetime
 
-from descriptors import ValidPayload, ValidPriority, ValidStatus
-from exceptions import TaskValidationError
+from src.descriptors import ValidPayload, ValidPriority, ValidStatus
+from src.exceptions import TaskValidationError
 
 
 

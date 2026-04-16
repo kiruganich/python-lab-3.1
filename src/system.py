@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 import logging
 from random import randint
-from task import Task
+from src.task import Task
 
 logger = logging.getLogger(__name__)
 
