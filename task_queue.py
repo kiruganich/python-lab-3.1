@@ -21,7 +21,6 @@ class TaskQueue:
         self._source = source
         self._tasks: deque[Task] = deque()
         if source:
-            # Лениво добавляем задачи из источника при первой инициализации
             for task in source.get_tasks():
                 self._tasks.append(task)
     
