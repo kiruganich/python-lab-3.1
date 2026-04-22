@@ -18,10 +18,12 @@ class TaskQueue:
 
     """
     def __init__(self, source: TaskSource | None = None) -> None:
+        self._source = source
+        self._tasks: deque[Task] = deque()
         if source:
-            self._tasks: deque[Task] = deque(source.get_tasks())
-        else:
-            self._tasks: deque[Task] = deque()
+            # Лениво добавляем задачи из источника при первой инициализации
+            for task in source.get_tasks():
+                self._tasks.append(task)
     
     def __iter__(self) -> Iterator[Task]:
         return iter(self._tasks)
