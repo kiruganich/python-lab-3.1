@@ -6,7 +6,8 @@ import logging
 from src.task import Task
 from src.task_queue import TaskQueue
 from src.exceptions import TaskValidationError, TaskPriorityError, TaskPayloadError
-from src.system import GeneratorTaskSource, APITaskSource, FileTaskSource, create_sample_file
+from src.system import create_sample_file
+from src.sources import GeneratorTaskSource, APITaskSource, FileTaskSource
 
 logging.basicConfig(
     level=logging.INFO,

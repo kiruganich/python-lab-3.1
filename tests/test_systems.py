@@ -187,10 +187,7 @@ class TestTaskQueueFilters:
 
     def test_filter_active(self, queue):
         active = list(queue.filter_active())
-        # is_active проверяет status not in {"completed", "cancelled"}
-        # "done" считается активным (т.к. нет статуса "completed")
-        # только "cancelled" — не активен
-        assert len(active) == 4
+        assert len(active) == 3
 
     def test_filter_active_excludes_cancelled(self, queue):
         active = list(queue.filter_active())
